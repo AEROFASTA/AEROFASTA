@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotizador en Web</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* Fondo azul claro */
+        }
+        .container {
+            background-color: #ffffff; /* Fondo blanco para el contenido */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50; /* Azul oscuro */
+        }
+        .form-control:read-only {
+            background-color: #f8f9fa;
+        }
+        .form-control:disabled {
+            background-color: #e9ecef;
+        }
+        .info-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9; /* Verde claro */
+            border-radius: 5px;
+            color: #2c3e50; /* Azul oscuro */
+        }
+        .btn-whatsapp {
+            background-color: #25d366; /* Verde de WhatsApp */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn-whatsapp:hover {
+            background-color: #128c7e; /* Verde más oscuro al pasar el mouse */
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Oculta flechas en Firefox */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Oculta flechas en Chrome/Safari */
+            margin: 0;
+        }
+        /* Estilo para la cabecera de la tabla */
+        .table thead th {
+            background-color: #add8e6; /* Azul claro */
+            color: #000; /* Texto negro */
+            white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+        }
+        /* Asegurar que el nombre de la ciudad no se corte */
+        #ciudadInput {
+            min-width: 120px; /* Ajusta este valor según sea necesario */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Cotizador en Web</h2>
+
+    <!-- Dropdown para seleccionar ciudad -->
+    <div class="mb-3">
+        <label for="ciudad" class="form-label">Selecciona una ciudad:</label>
+        <select id="ciudad" class="form-select" onchange="cargarDatosCiudad()">
+            <option value="">-- Selecciona una ciudad --</option>
+            <option value="San andres">San Andrés</option>
+            <option value="Barranquilla">Barranquilla</option>
+            <option value="Monteria">Montería</option>
+            <option value="Bucaramanga">Bucaramanga</option>
+            <option value="Cali">Cali</option>
+            <option value="Medellin">Medellín</option>
+            <option value="Leticia">Leticia</option>
+            <option value="Valledupar">Valledupar</option>
+            <option value="Pasto">Pasto</option>
+            <option value="Pereira">Pereira</option>
+        </select>
+    </div>
+
+    <!-- Tabla de datos -->
+    <table class="table table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Ciudad</th>
+                <th># de Piezas</th>
+                <th>Largo (cm)</th>
+                <th>Alto (cm)</th>
+                <th>Ancho (cm)</th>
+                <th>Peso (Kg)</th>
+                <th>Peso V (Kg)</th>
+                <th>Tarifa Base ($)</th>
+                <th>Mínima</th>
+                <th>Tarifa Final ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" id="ciudadInput" class="form-control" readonly></td>
+                <td><input type="number" id="numPiezas" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="largo" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="alto" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="ancho" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="pesoReal" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="pesoVolumetrico" class="form-control" readonly></td>
+                <td><input type="number" id="tarifaBase" class="form-control" oninput="calcularTarifaFinal()"></td>
+                <td><input type="number" id="minima" class="form-control" readonly></td>
+                <td><input type="number" id="tarifaFinal" class="form-control" readonly></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Botón de Reinicio -->
+    <div class="text-center mb-3">
+        <button class="btn btn-warning" onclick="reiniciarFormulario()">Reiniciar</button>
+    </div>
+
+    <!-- Información de la Cotización -->
+    <div class="info-box">
+        <h5>Información de la Cotización:</h5>
+        <p><strong>Ciudad:</strong> <span id="infoCiudad">-</span></p>
+        <p><strong># de Piezas:</strong> <span id="infoPiezas">-</span></p>
+        <p><strong>Peso (Mayor):</strong> <span id="infoPeso">-</span></p>
+        <p><strong>Valor Final:</strong> $<span id="infoValor">-</span></p>
+        <p>Para más información, contáctanos por WhatsApp:</p>
+        <a href="https://wa.me/573183560805" class="btn-whatsapp" target="_blank">Contactar a Luis Eduardo Marín G.</a>
+    </div>
+</div>
+
+<!-- Bootstrap JS y dependencias -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Datos de las ciudades (simulando una base de datos)
+    const datosCiudades = {
+        "San andres": { tarifaBase: 1300, minima: 130000 },
+        "Barranquilla": { tarifaBase: 1300, minima: 130000 },
+        "Monteria": { tarifaBase: 1300, minima: 130000 },
+        "Bucaramanga": { tarifaBase: 1300, minima: 130000 },
+        "Cali": { tarifaBase: 1300, minima: 130000 },
+        "Medellin": { tarifaBase: 1300, minima: 130000 },
+        "Leticia": { tarifaBase: 1300, minima: 130000 },
+        "Valledupar": { tarifaBase: 1300, minima: 130000 },
+        "Pasto": { tarifaBase: 1300, minima: 130000 },
+        "Pereira": { tarifaBase: 1300, minima: 130000 }
+    };
+
+    // Función para cargar los datos de la ciudad seleccionada
+    function cargarDatosCiudad() {
+        const ciudadSeleccionada = document.getElementById("ciudad").value;
+        if (ciudadSeleccionada) {
+            const datos = datosCiudades[ciudadSeleccionada];
+            document.getElementById("ciudadInput").value = ciudadSeleccionada;
+            document.getElementById("tarifaBase").value = datos.tarifaBase;
+            document.getElementById("minima").value = datos.minima;
+
+            // Limpiar los demás campos para que el usuario los ingrese manualmente
+            document.getElementById("numPiezas").value = "";
+            document.getElementById("largo").value = "";
+            document.getElementById("alto").value = "";
+            document.getElementById("ancho").value = "";
+            document.getElementById("pesoReal").value = "";
+            document.getElementById("pesoVolumetrico").value = "";
+            document.getElementById("tarifaFinal").value = "";
+
+            // Limpiar información de la cotización
+            document.getElementById("infoCiudad").textContent = ciudadSeleccionada;
+            document.getElementById("infoPiezas").textContent = "-";
+            document.getElementById("infoPeso").textContent = "-";
+            document.getElementById("infoValor").textContent = "-";
+        } else {
+            reiniciarFormulario(); // Limpiar campos si no se selecciona una ciudad
+        }
+    }
+
+    // Función para calcular la tarifa final
+    function calcularTarifaFinal() {
+        const numPiezas = parseFloat(document.getElementById("numPiezas").value) || 0;
+        const largo = parseFloat(document.getElementById("largo").value) || 0;
+        const alto = parseFloat(document.getElementById("alto").value) || 0;
+        const ancho = parseFloat(document.getElementById("ancho").value) || 0;
+        const pesoReal = parseFloat(document.getElementById("pesoReal").value) || 0;
+        const tarifaBase = parseFloat(document.getElementById("tarifaBase").value) || 0;
+        const minima = parseFloat(document.getElementById("minima").value) || 0;
+
+        // Calcular Peso Volumétrico
+        const pesoVolumetrico = (largo * alto * ancho) / 1000000 * 167 * numPiezas;
+        document.getElementById("pesoVolumetrico").value = pesoVolumetrico.toFixed(2);
+
+        // Calcular Tarifa Final (según la fórmula del Excel)
+        const maxPeso = Math.max(pesoReal, pesoVolumetrico);
+        let tarifaFinal;
+        if (maxPeso < 49) {
+            tarifaFinal = minima;
+        } else if (maxPeso * tarifaBase < minima) {
+            tarifaFinal = tarifaBase * 108; // Aquí estaba el error, ahora está corregido
+        } else {
+            tarifaFinal = maxPeso * tarifaBase;
+        }
+        // Mostrar la tarifa final sin decimales
+        document.getElementById("tarifaFinal").value = Math.round(tarifaFinal);
+
+        // Actualizar información de la cotización
+        document.getElementById("infoCiudad").textContent = document.getElementById("ciudadInput").value;
+        document.getElementById("infoPiezas").textContent = numPiezas;
+        document.getElementById("infoPeso").textContent = maxPeso.toFixed(2) + " kg";
+        document.getElementById("infoValor").textContent = Math.round(tarifaFinal);
+    }
+
+    // Función para reiniciar el formulario
+    function reiniciarFormulario() {
+        document.getElementById("ciudad").value = "";
+        document.getElementById("ciudadInput").value = "";
+        document.getElementById("numPiezas").value = "";
+        document.getElementById("largo").value = "";
+        document.getElementById("alto").value = "";
+        document.getElementById("ancho").value = "";
+        document.getElementById("pesoReal").value = "";
+        document.getElementById("tarifaBase").value = "";
+        document.getElementById("minima").value = "";
+        document.getElementById("pesoVolumetrico").value = "";
+        document.getElementById("tarifaFinal").value = "";
+
+        // Limpiar información de la cotización
+        document.getElementById("infoCiudad").textContent = "-";
+        document.getElementById("infoPiezas").textContent = "-";
+        document.getElementById("infoPeso").textContent = "-";
+        document.getElementById("infoValor").textContent = "-";
+    }
+</script>
+
+</body>
+</html>
